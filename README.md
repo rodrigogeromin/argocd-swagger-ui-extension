@@ -4,7 +4,7 @@ Página **Swagger** no menu lateral, rota `/swagger`, com catálogo das publica�
 
 O menu lateral, a rota e o ícone pertencem ao Argo CD. A extensão consulta o Swagger Gateway pelo proxy `/extensions/swagger`, usando a sessão do usuário e os headers de contexto. Não contém credenciais e não acessa DNS Kubernetes pelo navegador.
 
-A correção **v0.2.1** aguarda o primeiro commit do host em `#app` antes de registrar a página, ou registra imediatamente se o host já estiver montado. O React 19 agenda `createRoot.render` de forma assíncrona; na v0.2.0 o evento síncrono podia ocorrer antes da inscrição do App e perder menu e rota. A publicação e instalação da v0.2.1 dependem de verificação do operador.
+A correção **v0.2.1** aguarda o primeiro commit do host em `#app` antes de registrar a página, ou registra imediatamente se o host já estiver montado. O React 19 agenda `createRoot.render` de forma assíncrona; na v0.2.0 o evento síncrono podia ocorrer antes da inscrição do App e perder menu e rota.
 
 ## Comportamento
 
@@ -65,11 +65,13 @@ O workflow `release.yml` publica por tag `v` + `package.json.version`, após val
 
 A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e abra Swagger no menu lateral, rota `/swagger`, sem selecionar Application. Gateway, proxy e RBAC continuam separados.
 
+A release **v0.2.1** foi publicada e instalada no mesmo Argo CD 3.5.1, contexto `k3d-dev`, corrigindo a sequência de registro. Rollout 1/1 Ready, checksum, hash no pod e bundle exato servido foram conferidos; catálogo e docs Go/Java passaram pelo proxy autenticado. Os testes reproduziram a falha anterior e passaram com o carregamento antes e depois da montagem do host. A execução do JavaScript completo servido também foi conferida em jsdom, mantendo essa evidência separada de um navegador real. Veja as [evidências v0.2.1](docs/evidence/installation-v0.2.1-k3d-dev.json).
+
 A release **v0.2.0** (system-level) foi publicada e instalada no Argo CD 3.5.1 do contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; hash no pod, bundle exato servido, ausência do antigo bundle Top Bar do Swagger e catálogo/specs autenticados foram conferidos. Outras extensões foram preservadas. Depois dessa instalação, o usuário relatou que Swagger não apareceu no menu lateral; os checks HTTP não comprovaram a inscrição da página. Veja as [evidências v0.2.0](docs/evidence/installation-v0.2.0-k3d-dev.json).
 
 Registro histórico: a release **v0.1.0 foi instalada persistentemente no Argo CD 3.5.1 do contexto k3d-dev**, por init container no Deployment. Rollout, checksum no pod, bundle exato servido e catálogo/specs pelo proxy autenticado foram verificados; outras extensões foram preservadas. Consulte as [evidências de instalação](docs/evidence/installation-v0.1.0-k3d-dev.json).
 
-**Validação visual pendente:** não havia navegador disponível na sessão de instalação. Na instalação histórica v0.1.0, registro efetivo no browser, visibilidade da ação, abertura/fechamento do flyout e renderização do iframe não foram observados. Na v0.2.0, o bundle instalado foi conferido; renderização do menu lateral, navegação e interação do iframe ainda aguardam teste real no browser. A matriz de integração continua vazia e os checks locais/CI mantêm `integration: not-run`. O backend da PoC permanece independente; outros ambientes exigem instalação conforme o manual.
+**Validação visual pendente:** não havia navegador disponível na sessão de instalação. Na instalação histórica v0.1.0, registro efetivo no browser, visibilidade da ação, abertura/fechamento do flyout e renderização do iframe não foram observados. Na v0.2.0, o usuário relatou ausência do menu. A v0.2.1 corrige a corrida de inicialização e foi instalada; renderização do menu lateral, navegação e interação do iframe ainda aguardam teste real no browser. A matriz de integração continua vazia e os checks locais/CI mantêm `integration: not-run`. O backend da PoC permanece independente; outros ambientes exigem instalação conforme o manual.
 
 ## Pré-requisitos do gateway
 

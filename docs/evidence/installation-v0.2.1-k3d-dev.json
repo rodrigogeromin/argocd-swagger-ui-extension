@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-24T02:08:58.671519+00:00",
+  "release": {
+    "repository": "rodrigogeromin/argocd-swagger-ui-extension",
+    "tag": "v0.2.1",
+    "commit": "53a71f5392178820985a479d2b0090c75fddc2aa",
+    "packageSha256": "2031bef679d36dceeb5276b106cebfe8fe740ea6ea29e717b215ca9a77c03a1e",
+    "bundleSha256": "374aba021f4777b35d34ae1aaa4f6690039aea4d1a011155113baa1406e3db8d",
+    "patchSha256": "15f273a8543e96d6dbd3cc78fad1bec5e804418b395edc1be09c70fd0f15d8f2"
+  },
+  "host": {
+    "context": "k3d-dev",
+    "argoCdVersion": "3.5.1",
+    "image": "quay.io/argoproj/argocd:v3.5.1",
+    "namespace": "argocd",
+    "deployment": "argocd-server",
+    "replicas": 1,
+    "readyReplicas": 1
+  },
+  "installation": {
+    "status": "passed",
+    "method": "Release strategic merge patch upgrade from v0.2.0; existing Swagger installer identity retained",
+    "initContainer": "argocd-extension-installer-swagger-gateway",
+    "image": "quay.io/argoprojlabs/argocd-extension-installer:v1.1.0@sha256:6cc786ba4dc96ba81d5010fbf92adabef15aff89753a55e22b8d829cd8b6e2a8",
+    "sharedVolume": "tmp",
+    "file": "/tmp/extensions/resources/extension-swagger-gateway.js",
+    "installerLog": "UI extension installed successfully",
+    "rollout": "passed",
+    "podFileHashMatchesRelease": true,
+    "servedExtensionsJsContainsExactReleaseBundle": true,
+    "preservedInstallers": [
+      "argocd-extension-installer-argo-rollouts",
+      "argocd-extension-installer-service-catalog"
+    ],
+    "oldSwaggerTopBarBundleAbsentFromServedExtensionsJs": true,
+    "newBundleContainsOnlySystemLevelRegistration": true,
+    "oldSwaggerV020BundleAbsentFromServedExtensionsJs": true,
+    "servedReleaseBundleOccurrences": 1,
+    "pod": "argocd-server-7459dbc7f5-kblrb"
+  },
+  "proxyVerification": {
+    "status": "passed",
+    "authentication": "Argo CD API session, credentials omitted",
+    "checks": [
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "contextHeaders": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": true,
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/unknown",
+        "httpStatus": 404
+      }
+    ]
+  },
+  "browser": {
+    "status": "not-run",
+    "reason": "Computer-use inventory exposed no browser. Sidebar navigation and Swagger iframe interaction on the actual host were not observed; simulated lifecycle tests do not establish browser integration."
+  },
+  "integratedVersions": [],
+  "note": "Persistent v0.2.1 installation and authenticated HTTP checks passed. Startup regression reproduced v0.2.0 failure and passes after fix. Browser rendering remains unverified. Historical v0.1.0/v0.2.0 observations retained separately.",
+  "profile": {
+    "name": "system-level",
+    "method": "registerSystemLevelExtension",
+    "path": "/swagger",
+    "title": "Swagger",
+    "icon": "fa-book",
+    "applicationPropsRequired": false,
+    "explicitProxyContext": {
+      "application": "argocd:swagger-gateway",
+      "project": "appset"
+    }
+  },
+  "routeVerification": {
+    "path": "/swagger",
+    "requestAccept": "text/html",
+    "httpStatus": 200,
+    "scope": "Argo CD application shell only; client route rendering is not observed by this HTTP check."
+  },
+  "troubleshooting": {
+    "reportedSymptom": "User reported no Swagger sidebar after v0.2.0 installation",
+    "rootCause": "Synchronous systemLevel registration could precede App constructor listener subscription during React 19 async createRoot startup; the host does not replay earlier registry entries.",
+    "fix": "Wait for the first direct element in #app using MutationObserver, then disconnect and register once; register immediately when already mounted.",
+    "regression": {
+      "oldBundleEarlyHost": "failed as expected",
+      "newBundleEarlyHost": "passed",
+      "newBundleReadyHost": "passed",
+      "laterMutations": "no duplicate registration",
+      "missingRoot": "explicit error",
+      "unitAndDomainTests": 49,
+      "productionBundleCases": 2
+    },
+    "servedCombinedBundle": {
+      "runtime": "jsdom simulation with host React globals",
+      "beforeRootCommit": "Swagger registration withheld",
+      "afterRootCommit": "one Swagger registration",
+      "laterMutations": "still one Swagger registration",
+      "precedingExtensionException": false
+    },
+    "sourceReferences": [
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/index.tsx",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/app.tsx",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/shared/services/extensions-service.ts",
+      "https://github.com/rodrigogeromin/argocd-system-ui-extension/blob/develop/src/argocd/startup.ts"
+    ]
+  },
+  "ci": {
+    "validation": "https://github.com/rodrigogeromin/argocd-swagger-ui-extension/actions/runs/40052718947",
+    "release": "https://github.com/rodrigogeromin/argocd-swagger-ui-extension/actions/runs/40052733234",
+    "status": "success"
+  }
+}
