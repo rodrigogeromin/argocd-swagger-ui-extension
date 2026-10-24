@@ -63,11 +63,11 @@ O workflow `release.yml` publica por tag `v` + `package.json.version`, após val
 
 A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e abra Swagger no menu lateral, rota `/swagger`, sem selecionar Application. Gateway, proxy e RBAC continuam separados.
 
-A versão atual do repositório é **v0.2.0** (system-level); sua publicação e instalação aguardam o operador.
+A release **v0.2.0** (system-level) foi publicada e instalada no Argo CD 3.5.1 do contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; hash no pod, bundle exato servido, ausência do antigo bundle Top Bar do Swagger e catálogo/specs autenticados foram conferidos. Outras extensões foram preservadas. Veja as [evidências v0.2.0](docs/evidence/installation-v0.2.0-k3d-dev.json).
 
 Registro histórico: a release **v0.1.0 foi instalada persistentemente no Argo CD 3.5.1 do contexto k3d-dev**, por init container no Deployment. Rollout, checksum no pod, bundle exato servido e catálogo/specs pelo proxy autenticado foram verificados; outras extensões foram preservadas. Consulte as [evidências de instalação](docs/evidence/installation-v0.1.0-k3d-dev.json).
 
-**Validação visual pendente:** não havia navegador disponível na sessão de instalação. Na instalação histórica v0.1.0, registro efetivo no browser, visibilidade da ação, abertura/fechamento do flyout e renderização do iframe não foram observados. A nova página v0.2.0 também aguarda teste real no browser. A matriz de integração continua vazia e os checks locais/CI mantêm `integration: not-run`. O backend da PoC permanece independente; outros ambientes exigem instalação conforme o manual.
+**Validação visual pendente:** não havia navegador disponível na sessão de instalação. Na instalação histórica v0.1.0, registro efetivo no browser, visibilidade da ação, abertura/fechamento do flyout e renderização do iframe não foram observados. Na v0.2.0, o bundle instalado foi conferido; renderização do menu lateral, navegação e interação do iframe ainda aguardam teste real no browser. A matriz de integração continua vazia e os checks locais/CI mantêm `integration: not-run`. O backend da PoC permanece independente; outros ambientes exigem instalação conforme o manual.
 
 ## Pré-requisitos do gateway
 

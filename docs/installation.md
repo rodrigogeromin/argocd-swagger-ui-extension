@@ -67,6 +67,12 @@ O gateway precisa servir catálogo, HTML e specs pelo Proxy Extension `swagger`,
 
 O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não aceite HTML arbitrário de upstreams. A CSP deve permitir os recursos da CDN versionada usados pelo gateway; revise as diretivas necessárias segundo a política do ambiente, sem desabilitar a CSP globalmente. Try it out permanece desabilitado. Não inclua credenciais no bundle ou no patch. Preserve o contexto autorizado da PoC e valide RBAC de Application/extensão antes de ampliar acesso.
 
+## Instalação observada (v0.2.0)
+
+A release system-level v0.2.0 foi publicada e instalada no contexto `k3d-dev`, Argo CD 3.5.1. O mesmo init container e arquivo foram atualizados, preservando os outros instaladores. Rollout 1/1 Ready, checksum, hash do bundle no pod e bytes servidos por `/extensions.js` foram conferidos; o bundle Top Bar anterior do Swagger não é mais servido. Catálogo e documentação Go/Java responderam pelo proxy autenticado.
+
+A navegação HTML para `/swagger` devolveu o shell do Argo CD. Essa verificação HTTP não comprova renderização do componente. Recarregue com Ctrl+Shift+R e abra Swagger no menu lateral. Navegador indisponível nesta sessão: menu, navegação e iframe continuam sem validação visual. [Registro com hashes e escopo das verificações](evidence/installation-v0.2.0-k3d-dev.json).
+
 ## Instalação histórica observada (v0.1.0)
 
 A release v0.1.0 foi instalada no Deployment `argocd/argocd-server`, Argo CD 3.5.1, contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; o instalador validou o checksum, e o hash no pod e o bundle servido por `/extensions.js` correspondem à release. Catálogo e docs das duas publicações responderam 200 pelo proxy autenticado. Instaladores anteriores foram preservados.

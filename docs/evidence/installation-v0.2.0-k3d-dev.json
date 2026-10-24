@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-24T01:55:23.523717+00:00",
+  "release": {
+    "repository": "rodrigogeromin/argocd-swagger-ui-extension",
+    "tag": "v0.2.0",
+    "commit": "ad39cb0a3584b5150efdcaedcf39791ec69d9488",
+    "packageSha256": "84748ba50ffa011232cc2e6be0e55d369d7c53b6aacf25060dc75cb3bbbbe79c",
+    "bundleSha256": "664612de969ce3c8dde785837db64bd57ae394eceee29a7c7286eaea80cf2700",
+    "patchSha256": "874dcbb1f9154c96916610a671e200d62ab1987fab6fa4a19e2becbd1b2bea34"
+  },
+  "host": {
+    "context": "k3d-dev",
+    "argoCdVersion": "3.5.1",
+    "image": "quay.io/argoproj/argocd:v3.5.1",
+    "namespace": "argocd",
+    "deployment": "argocd-server",
+    "replicas": 1,
+    "readyReplicas": 1
+  },
+  "installation": {
+    "status": "passed",
+    "method": "In-place release strategic merge patch upgrade from v0.1.0, preserving existing init container name and file",
+    "initContainer": "argocd-extension-installer-swagger-gateway",
+    "image": "quay.io/argoprojlabs/argocd-extension-installer:v1.1.0@sha256:6cc786ba4dc96ba81d5010fbf92adabef15aff89753a55e22b8d829cd8b6e2a8",
+    "sharedVolume": "tmp",
+    "file": "/tmp/extensions/resources/extension-swagger-gateway.js",
+    "installerLog": "UI extension installed successfully",
+    "rollout": "passed",
+    "podFileHashMatchesRelease": true,
+    "servedExtensionsJsContainsExactReleaseBundle": true,
+    "preservedInstallers": [
+      "argocd-extension-installer-argo-rollouts",
+      "argocd-extension-installer-service-catalog"
+    ],
+    "oldSwaggerTopBarBundleAbsentFromServedExtensionsJs": true,
+    "newBundleContainsOnlySystemLevelRegistration": true
+  },
+  "proxyVerification": {
+    "status": "passed",
+    "authentication": "Argo CD API session, credentials omitted",
+    "checks": [
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "contextHeaders": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": true,
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/unknown",
+        "httpStatus": 404
+      }
+    ]
+  },
+  "browser": {
+    "status": "not-run",
+    "reason": "Computer-use inventory exposed no available browser. Sidebar rendering/navigation and Swagger iframe interaction were not observed."
+  },
+  "integratedVersions": [],
+  "note": "Persistent v0.2.0 installation and authenticated HTTP checks are observed. Production harness verifies a no-props system page locally; actual browser integration remains unverified. Historical v0.1.0 evidence is retained separately.",
+  "profile": {
+    "name": "system-level",
+    "method": "registerSystemLevelExtension",
+    "path": "/swagger",
+    "title": "Swagger",
+    "icon": "fa-book",
+    "applicationPropsRequired": false,
+    "explicitProxyContext": {
+      "application": "argocd:swagger-gateway",
+      "project": "appset"
+    }
+  },
+  "routeVerification": {
+    "path": "/swagger",
+    "requestAccept": "text/html",
+    "httpStatus": 200,
+    "scope": "Argo CD application shell only; client route rendering is not observed by this HTTP check."
+  }
+}
