@@ -64,3 +64,9 @@ Após rollout, confira os logs do init container e o arquivo em todos os pods do
 O gateway precisa servir catálogo, HTML e specs pelo Proxy Extension `swagger`, com contexto de Application e permissões server-side. Consulte o [README](../README.md#pré-requisitos-do-gateway) e os patches em `config/` no repositório da tag. Instalar a UI não habilita o proxy, não implanta backend e não concede RBAC.
 
 O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não aceite HTML arbitrário de upstreams. A CSP deve permitir os recursos da CDN versionada usados pelo gateway; revise as diretivas necessárias segundo a política do ambiente, sem desabilitar a CSP globalmente. Try it out permanece desabilitado. Não inclua credenciais no bundle ou no patch. Preserve o contexto autorizado da PoC e valide RBAC de Application/extensão antes de ampliar acesso.
+
+## Instalação observada
+
+A release v0.1.0 foi instalada no Deployment `argocd/argocd-server`, Argo CD 3.5.1, contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; o instalador validou o checksum, e o hash no pod e o bundle servido por `/extensions.js` correspondem à release. Catálogo e docs das duas publicações responderam 200 pelo proxy autenticado. Instaladores anteriores foram preservados.
+
+A validação visual não foi executada por indisponibilidade de navegador; interação e renderização no host continuam pendentes. Consulte o [registro com hashes e verificações](evidence/installation-v0.1.0-k3d-dev.json). Instalação persistente e comportamento real da UI são evidências distintas.

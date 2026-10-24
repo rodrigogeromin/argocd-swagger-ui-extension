@@ -64,7 +64,9 @@ O workflow `release.yml` publica por tag `v` + `package.json.version`, após val
 
 A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e verifique a ação Swagger na Application da PoC. Gateway, proxy e RBAC continuam separados.
 
-**Este repositório não instala a UI no cluster nem declara integração real comprovada.** O backend da PoC é independente. A instalação e a validação visual no Argo CD 3.5.1 são uma etapa separada; os checks locais e o CI mantêm `integration: not-run`.
+A release **v0.1.0 foi instalada persistentemente no Argo CD 3.5.1 do contexto k3d-dev**, por init container no Deployment. Rollout, checksum no pod, bundle exato servido e catálogo/specs pelo proxy autenticado foram verificados; outras extensões foram preservadas. Consulte as [evidências de instalação](docs/evidence/installation-v0.1.0-k3d-dev.json).
+
+**Validação visual pendente:** não havia navegador disponível na sessão de instalação. Registro efetivo no browser, visibilidade da ação, abertura/fechamento do flyout e renderização do iframe não foram observados. A matriz de integração continua vazia e os checks locais/CI mantêm `integration: not-run`. O backend da PoC permanece independente; outros ambientes exigem instalação conforme o manual.
 
 ## Pré-requisitos do gateway
 

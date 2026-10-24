@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-24T01:40:27.479101+00:00",
+  "release": {
+    "repository": "rodrigogeromin/argocd-swagger-ui-extension",
+    "tag": "v0.1.0",
+    "commit": "25b5b1e755e9b433ba5d2c3e78d5bd2939dc35bb",
+    "packageSha256": "c55ca70ad76bb480f251174968a36e645ff0c1f5b6063b7e9aeed24a5a24f0a0",
+    "bundleSha256": "18226ac5e7530c8d86c18a9ee4366b3fff798818974237836b5657367009c5ab",
+    "patchSha256": "3939ff66f87c83c8a53a497355c2217cc052bf77d84e0929f52b39e8940d3e78"
+  },
+  "host": {
+    "context": "k3d-dev",
+    "argoCdVersion": "3.5.1",
+    "image": "quay.io/argoproj/argocd:v3.5.1",
+    "namespace": "argocd",
+    "deployment": "argocd-server",
+    "replicas": 1,
+    "readyReplicas": 1
+  },
+  "installation": {
+    "status": "passed",
+    "method": "Release strategic merge patch with checksum-verified init container",
+    "initContainer": "argocd-extension-installer-swagger-gateway",
+    "image": "quay.io/argoprojlabs/argocd-extension-installer:v1.1.0@sha256:6cc786ba4dc96ba81d5010fbf92adabef15aff89753a55e22b8d829cd8b6e2a8",
+    "sharedVolume": "tmp",
+    "file": "/tmp/extensions/resources/extension-swagger-gateway.js",
+    "installerLog": "UI extension installed successfully",
+    "rollout": "passed",
+    "podFileHashMatchesRelease": true,
+    "servedExtensionsJsContainsExactReleaseBundle": true,
+    "preservedInstallers": [
+      "argocd-extension-installer-argo-rollouts",
+      "argocd-extension-installer-service-catalog"
+    ]
+  },
+  "proxyVerification": {
+    "status": "passed",
+    "authentication": "Argo CD API session, credentials omitted",
+    "checks": [
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "contextHeaders": false,
+        "httpStatus": 400
+      },
+      {
+        "path": "/extensions/swagger/api/v1/catalog",
+        "authenticated": true,
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/go-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/ui/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/java-demo",
+        "httpStatus": 200
+      },
+      {
+        "path": "/extensions/swagger/specs/unknown",
+        "httpStatus": 404
+      }
+    ]
+  },
+  "browser": {
+    "status": "not-run",
+    "reason": "Computer-use inventory exposed no available browser. Actual registration, action visibility, flyout open/close and iframe rendering were not observed."
+  },
+  "integratedVersions": [],
+  "note": "Persistent deployment and authenticated HTTP checks are observed evidence. Local validation/harness and served bundle bytes do not certify browser integration."
+}
