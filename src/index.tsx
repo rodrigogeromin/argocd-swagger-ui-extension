@@ -1,2 +1,3 @@
-import {register, HostPage} from './argocd/register';
-register(HostPage);
+import {HostPage} from './argocd/register';
+import {registerWhenHostMounted} from './argocd/startup';
+registerWhenHostMounted(HostPage);

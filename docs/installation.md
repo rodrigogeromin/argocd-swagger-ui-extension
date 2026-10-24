@@ -2,7 +2,7 @@
 
 Alvo auditado: Argo CD **3.5.1**. O pacote instala somente o JavaScript da UI; gateway, proxy e RBAC são pré-requisitos separados. Checks locais e CI mantêm `integration.status: not-run` e não comprovam instalação ou validação visual no cluster.
 
-A versão **v0.2.0** usa a página system-level `/swagger`; instale-a com o patch conforme este manual. O init container e o nome do JavaScript permanecem iguais, substituindo a UI anterior sem duplicar a extensão.
+A versão **v0.2.1** corrige a corrida de inicialização da página system-level `/swagger`: aguarda o primeiro commit em `#app` antes de emitir o registro, ou registra imediatamente se o host já estiver montado. O React 19 agenda a renderização; na v0.2.0 o evento podia anteceder a inscrição do App e perder menu e rota. Use o patch da release conforme este manual. O init container e o nome do JavaScript permanecem iguais, substituindo a UI anterior sem duplicar a extensão.
 
 ## Publicar uma release
 
@@ -28,7 +28,7 @@ Substitua `VERSAO` pela mesma versão SemVer em todos os comandos. O workflow `r
 Para conferir o preparo local, após o build:
 
 ```sh
-RELEASE_TAG=v0.2.0 RELEASE_REPOSITORY=rodrigogeromin/argocd-swagger-ui-extension node scripts/release-assets.mjs
+RELEASE_TAG=v0.2.1 RELEASE_REPOSITORY=rodrigogeromin/argocd-swagger-ui-extension node scripts/release-assets.mjs
 (cd dist && sha256sum --check checksums.txt)
 ```
 
@@ -41,17 +41,17 @@ O patch assume Deployment `argocd/argocd-server`, container `argocd-server` e vo
 Baixe uma tag específica e confira o checksum antes de revisar/aplicar:
 
 ```sh
-gh release download v0.2.0 --repo rodrigogeromin/argocd-swagger-ui-extension \
+gh release download v0.2.1 --repo rodrigogeromin/argocd-swagger-ui-extension \
   --pattern swagger-gateway.tar.gz --pattern checksums.txt \
   --pattern argocd-server-patch.yaml --pattern validation-report.json \
-  --pattern installation.md --dir release-v0.2.0
-(cd release-v0.2.0 && sha256sum --check checksums.txt)
+  --pattern installation.md --dir release-v0.2.1
+(cd release-v0.2.1 && sha256sum --check checksums.txt)
 kubectl get deployment argocd-server -n argocd -o yaml > argocd-server-before.yaml
 # Revise o patch e adapte a fonte de configuração do ambiente antes de aplicar.
 kubectl patch deployment argocd-server -n argocd --type strategic \
-  --patch-file release-v0.2.0/argocd-server-patch.yaml --dry-run=server -o yaml
+  --patch-file release-v0.2.1/argocd-server-patch.yaml --dry-run=server -o yaml
 kubectl patch deployment argocd-server -n argocd --type strategic \
-  --patch-file release-v0.2.0/argocd-server-patch.yaml
+  --patch-file release-v0.2.1/argocd-server-patch.yaml
 kubectl rollout status deployment/argocd-server -n argocd
 ```
 
@@ -70,6 +70,8 @@ O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não 
 ## Instalação observada (v0.2.0)
 
 A release system-level v0.2.0 foi publicada e instalada no contexto `k3d-dev`, Argo CD 3.5.1. O mesmo init container e arquivo foram atualizados, preservando os outros instaladores. Rollout 1/1 Ready, checksum, hash do bundle no pod e bytes servidos por `/extensions.js` foram conferidos; o bundle Top Bar anterior do Swagger não é mais servido. Catálogo e documentação Go/Java responderam pelo proxy autenticado.
+
+Após a instalação, o usuário relatou ausência de Swagger no menu lateral. A v0.2.1 corrige a corrida identificada, com regressão sobre o bundle de produção; os testes simulados são separados da verificação em navegador real.
 
 A navegação HTML para `/swagger` devolveu o shell do Argo CD. Essa verificação HTTP não comprova renderização do componente. Recarregue com Ctrl+Shift+R e abra Swagger no menu lateral. Navegador indisponível nesta sessão: menu, navegação e iframe continuam sem validação visual. [Registro com hashes e escopo das verificações](evidence/installation-v0.2.0-k3d-dev.json).
 

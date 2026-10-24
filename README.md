@@ -4,6 +4,8 @@ Página **Swagger** no menu lateral, rota `/swagger`, com catálogo das publica�
 
 O menu lateral, a rota e o ícone pertencem ao Argo CD. A extensão consulta o Swagger Gateway pelo proxy `/extensions/swagger`, usando a sessão do usuário e os headers de contexto. Não contém credenciais e não acessa DNS Kubernetes pelo navegador.
 
+A correção **v0.2.1** aguarda o primeiro commit do host em `#app` antes de registrar a página, ou registra imediatamente se o host já estiver montado. O React 19 agenda `createRoot.render` de forma assíncrona; na v0.2.0 o evento síncrono podia ocorrer antes da inscrição do App e perder menu e rota. A publicação e instalação da v0.2.1 dependem de verificação do operador.
+
 ## Comportamento
 
 1. Abra **Swagger** no menu lateral (`/swagger`).
@@ -38,7 +40,7 @@ npm run evidence:check
 npm audit --audit-level=moderate
 ```
 
-A validação executa tipos, lint, testes de domínio, build, inspeção do bundle, empacotamento e harness do JavaScript de produção. O harness modela os globals do host, o menu lateral, a página sem props e a troca de publicação. O relatório `validation-report.json` vincula os hashes das fontes, bundle e pacote. `npm run evidence:check` recusa evidências obsoletas.
+A validação executa tipos, lint, testes de domínio, build, inspeção do bundle, empacotamento e harness do JavaScript de produção. O harness executa o bundle real antes e depois do commit de um host React 19 com eventos síncronos, sem replay. Confere registro único, menu lateral, página sem props, globals externos e troca autenticada de publicação; isso é simulação, sem comprovar renderização no Argo CD real. O relatório `validation-report.json` vincula os hashes das fontes, bundle e pacote. `npm run evidence:check` recusa evidências obsoletas.
 
 A configuração do projeto é schema v2, template de origem 2.2.1. `references/host-audit.json` registra a inspeção das fontes oficiais da release exata; `extension-project.json` e `references/host-contract.json` registram o contrato executável. React/DOM **19.2.6**, tipos **19.2.14/19.2.3**, JSX automático: runtime externo fornecido pelo host, sem React embutido.
 
@@ -63,7 +65,7 @@ O workflow `release.yml` publica por tag `v` + `package.json.version`, após val
 
 A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e abra Swagger no menu lateral, rota `/swagger`, sem selecionar Application. Gateway, proxy e RBAC continuam separados.
 
-A release **v0.2.0** (system-level) foi publicada e instalada no Argo CD 3.5.1 do contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; hash no pod, bundle exato servido, ausência do antigo bundle Top Bar do Swagger e catálogo/specs autenticados foram conferidos. Outras extensões foram preservadas. Veja as [evidências v0.2.0](docs/evidence/installation-v0.2.0-k3d-dev.json).
+A release **v0.2.0** (system-level) foi publicada e instalada no Argo CD 3.5.1 do contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; hash no pod, bundle exato servido, ausência do antigo bundle Top Bar do Swagger e catálogo/specs autenticados foram conferidos. Outras extensões foram preservadas. Depois dessa instalação, o usuário relatou que Swagger não apareceu no menu lateral; os checks HTTP não comprovaram a inscrição da página. Veja as [evidências v0.2.0](docs/evidence/installation-v0.2.0-k3d-dev.json).
 
 Registro histórico: a release **v0.1.0 foi instalada persistentemente no Argo CD 3.5.1 do contexto k3d-dev**, por init container no Deployment. Rollout, checksum no pod, bundle exato servido e catálogo/specs pelo proxy autenticado foram verificados; outras extensões foram preservadas. Consulte as [evidências de instalação](docs/evidence/installation-v0.1.0-k3d-dev.json).
 

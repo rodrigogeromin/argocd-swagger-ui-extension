@@ -64,7 +64,8 @@
         "fromSchema": 2,
         "fromTemplate": "2.2.1",
         "validatorTemplate": "2.2.1"
-      }
+      },
+      "Wait for the first direct #app DOM commit before system-level registration; disconnect the startup observer before emitting the single registration event (Argo CD 3.5.1 / React 19 lifecycle)."
     ]
   },
   "compatibility": {
