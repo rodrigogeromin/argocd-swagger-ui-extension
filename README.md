@@ -52,7 +52,7 @@ dist/resources/extension-swagger-gateway.js
 dist/swagger-gateway.tar.gz
 ```
 
-O tar contém apenas `resources/extension-swagger-gateway.js`, adequado ao fluxo de instalação de extensões do Argo CD. O workflow do GitHub publica pacote e relatório como artifacts da execução. Para download:
+O tar contém apenas `resources/extension-swagger-gateway.js`, adequado ao fluxo de instalação de extensões do Argo CD. O workflow `validate.yml` publica pacote e relatório como artifacts da execução. Para download:
 
 ```sh
 gh run list --repo rodrigogeromin/argocd-swagger-ui-extension
@@ -60,7 +60,9 @@ gh run download RUN_ID --repo rodrigogeromin/argocd-swagger-ui-extension \
   --name swagger-gateway-extension --dir artifacts
 ```
 
-A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`, por meio do instalador/init container e volume compartilhado usados no ambiente. Preserve outras extensões e init containers existentes. Depois da instalação, recarregue a interface e verifique a ação Swagger na Application da PoC.
+O workflow `release.yml` publica por tag `v` + `package.json.version`, após validar a identidade, executar `validate` e conferir as evidências. Anexa `swagger-gateway.tar.gz`, `checksums.txt`, `argocd-server-patch.yaml`, `validation-report.json` e `installation.md`. Atualize a versão e o lockfile, valide e envie o commit antes de criar/enviar a tag correspondente. O [manual de publicação e instalação](docs/installation.md) contém os comandos e a revisão necessária do patch.
+
+A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e verifique a ação Swagger na Application da PoC. Gateway, proxy e RBAC continuam separados.
 
 **Este repositório não instala a UI no cluster nem declara integração real comprovada.** O backend da PoC é independente. A instalação e a validação visual no Argo CD 3.5.1 são uma etapa separada; os checks locais e o CI mantêm `integration: not-run`.
 

@@ -1,0 +1,39 @@
+name: Release extension
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.ref_name }}
+      RELEASE_REPOSITORY: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Validate release identity before installing dependencies
+        run: node scripts/release-assets.mjs --validate-only
+      - run: npm install --global npm@11.19.1
+      - run: npm ci
+      - run: npm run validate
+      - run: npm run evidence:check
+      - name: Prepare release assets
+        run: node scripts/release-assets.mjs
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --repo "$RELEASE_REPOSITORY" --verify-tag --generate-notes \
+            dist/swagger-gateway.tar.gz dist/checksums.txt \
+            dist/argocd-server-patch.yaml validation-report.json docs/installation.md
