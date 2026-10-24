@@ -4,36 +4,31 @@ import * as ReactDOM from 'react-dom';
 import {jsxRuntime} from './host-runtime';
 import {render, screen, cleanup, fireEvent} from '@testing-library/react';
 import {readFileSync} from 'node:fs';
-import type {ExtensionProps, ExtensionsAPI, FlyoutProps} from '../src/argocd/types';
-import {validContext} from './fixtures/context';
+import type {ExtensionsAPI} from '../src/argocd/types';
 import {gatewayFetch} from './test-fixtures';
 
-test('production bundle obeys host registration, wrapper ownership, context and authenticated data flow', async () => {
+test('production bundle registers a sidebar page without props and preserves authenticated data flow', async () => {
   global.fetch = gatewayFetch() as unknown as typeof fetch;
   const globals=window as unknown as Record<string, unknown>;
   globals.React=React; globals.ReactDOM=ReactDOM; globals.ReactJSXRuntime=jsxRuntime;
-  const registration=jest.fn();
-  window.extensionsAPI={registerTopBarActionMenuExt: registration} as unknown as ExtensionsAPI;
+  const registration=jest.fn(), topBar=jest.fn();
+  window.extensionsAPI={registerSystemLevelExtension: registration,registerTopBarActionMenuExt:topBar} as unknown as ExtensionsAPI;
   (0,eval)(readFileSync('dist/resources/extension-swagger-gateway.js','utf8'));
   expect(registration).toHaveBeenCalledTimes(1);
-  const [Component,title,id,Flyout,visible,icon,isMiddle]=registration.mock.calls[0] as [React.ComponentType<ExtensionProps>,string,string,React.ComponentType<FlyoutProps>,(app?: typeof validContext.application)=>boolean,string,boolean];
-  expect([title,id,icon,isMiddle]).toEqual(['Swagger','swagger-gateway','fa fa-book',true]);
-  expect(visible(validContext.application)).toBe(true); expect(visible()).toBe(false);
-  const before=JSON.stringify(validContext);
-  function freeze(value:unknown){if(value&&typeof value==='object'){Object.freeze(value);Object.values(value).forEach(freeze);}}
-  freeze(validContext);
-  const open=jest.fn();
-  render(<button onClick={open}><i className={icon} aria-hidden="true"/><Component {...validContext}/></button>);
-  expect(document.querySelectorAll('button')).toHaveLength(1);
-  expect(document.querySelectorAll('i')).toHaveLength(1);
-  expect(document.querySelector('button button')).toBeNull();
-  fireEvent.click(screen.getByRole('button',{name:'Swagger'})); expect(open).toHaveBeenCalledTimes(1);
-  cleanup(); render(<Flyout application={validContext.application} tree={validContext.tree}/>);
+  expect(topBar).not.toHaveBeenCalled();
+  const [Component,title,path,icon]=registration.mock.calls[0] as [React.ComponentType,string,string,string];
+  expect(registration.mock.calls[0]).toHaveLength(4);
+  expect([title,path,icon]).toEqual(['Swagger','/swagger','fa-book']);
+  // Exact v3.5.1 consumer adds the fa prefix, creates a sidebar route and
+  // wraps the component in Page, rendering it without Application/tree props.
+  render(<><nav aria-label="Menu lateral"><a href={path}><i className={`fa ${icon}`} aria-hidden="true"/>{title}</a></nav><main aria-label={title}><Component/></main></>);
+  expect(screen.getByRole('link',{name:'Swagger'})).toHaveAttribute('href','/swagger');
+  expect(document.querySelector('i')).toHaveClass('fa','fa-book');
   await screen.findByTitle('Documentação Go demo');
+  expect(fetch).toHaveBeenCalledWith('/extensions/swagger/api/v1/catalog',expect.objectContaining({credentials:'same-origin',headers:{'Argocd-Application-Name':'argocd:swagger-gateway','Argocd-Project-Name':'appset'}}));
   fireEvent.change(screen.getByLabelText('API publicada'),{target:{value:'java-demo'}});
   await screen.findByTitle('Documentação Java demo');
-  expect(JSON.stringify(validContext)).toBe(before);
+  expect(screen.queryByTitle('Documentação Go demo')).not.toBeInTheDocument();
   expect(globals.React).toBe(React); expect(globals.ReactDOM).toBe(ReactDOM); expect(globals.ReactJSXRuntime).toBe(jsxRuntime);
-  cleanup(); render(<Flyout/>); expect(screen.getByRole('status')).toHaveTextContent('Abra a Application');
-  delete window.extensionsAPI;
+  cleanup(); delete window.extensionsAPI;
 });

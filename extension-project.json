@@ -2,14 +2,11 @@
   "name": "swagger-gateway",
   "description": "Browse OpenAPI publications through the authenticated Argo CD Swagger Gateway proxy.",
   "argoCdVersion": "3.5.1",
-  "profile": "top-bar-action",
+  "profile": "system-level",
   "registration": {
     "title": "Swagger",
-    "id": "swagger-gateway",
-    "icon": "fa fa-book",
-    "isMiddle": true,
-    "shouldDisplay": true,
-    "flyout": true
+    "path": "/swagger",
+    "icon": "fa-book"
   },
   "dataSource": "proxy",
   "backend": {
@@ -26,14 +23,10 @@
       "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/package.json",
       "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/pnpm-lock.yaml"
     ],
-    "profile": "top-bar-action",
-    "method": "registerTopBarActionMenuExt",
-    "signature": "registerTopBarActionMenuExt(component, title, id, flyout, shouldDisplay?, iconClassName?, isMiddle?)",
-    "props": [
-      "application",
-      "tree",
-      "openFlyout"
-    ],
+    "profile": "system-level",
+    "method": "registerSystemLevelExtension",
+    "signature": "registerSystemLevelExtension(component, title, path, icon)",
+    "props": [],
     "globals": [
       "React",
       "ReactDOM",
@@ -43,16 +36,10 @@
     "argumentMap": [
       "component",
       "registration.title",
-      "registration.id",
-      "component.flyout",
-      "callback.shouldDisplay",
-      "registration.icon",
-      "registration.isMiddle"
+      "registration.path",
+      "registration.icon"
     ],
-    "flyoutProps": [
-      "application",
-      "tree"
-    ],
+    "flyoutProps": [],
     "runtime": {
       "react": "19.2.6",
       "reactDom": "19.2.6",
@@ -65,7 +52,19 @@
     "adaptations": [
       "Swagger catalog and trusted HTML flyout using authenticated proxy, base-href-aware paths, cancellation and context validation.",
       "Host-owned top bar action restricted to argocd:swagger-gateway in appset; domain and production bundle tests replace scaffold assertions.",
-      "Node 26.10.0/npm 11.19.1 and webpack-dev-server 6.1.0; patched transitive development dependencies."
+      "Node 26.10.0/npm 11.19.1 and webpack-dev-server 6.1.0; patched transitive development dependencies.",
+      {
+        "kind": "profile-change",
+        "from": "top-bar-action",
+        "to": "system-level",
+        "reason": "Independent Swagger page with explicit authorized PoC proxy context"
+      },
+      {
+        "kind": "manifest-migration",
+        "fromSchema": 2,
+        "fromTemplate": "2.2.1",
+        "validatorTemplate": "2.2.1"
+      }
     ]
   },
   "compatibility": {

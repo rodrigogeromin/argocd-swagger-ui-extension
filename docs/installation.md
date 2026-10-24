@@ -2,6 +2,8 @@
 
 Alvo auditado: Argo CD **3.5.1**. O pacote instala somente o JavaScript da UI; gateway, proxy e RBAC são pré-requisitos separados. Checks locais e CI mantêm `integration.status: not-run` e não comprovam instalação ou validação visual no cluster.
 
+A versão **v0.2.0** usa a página system-level `/swagger`; instale-a com o patch conforme este manual. O init container e o nome do JavaScript permanecem iguais, substituindo a UI anterior sem duplicar a extensão.
+
 ## Publicar uma release
 
 Use Node 26.10.0 (`.nvmrc`) e npm 11.19.1. Atualize `package.json.version` e o lockfile com `npm version VERSAO --no-git-tag-version`, execute os checks e envie o commit revisado antes de criar a tag:
@@ -26,7 +28,7 @@ Substitua `VERSAO` pela mesma versão SemVer em todos os comandos. O workflow `r
 Para conferir o preparo local, após o build:
 
 ```sh
-RELEASE_TAG=v0.1.0 RELEASE_REPOSITORY=rodrigogeromin/argocd-swagger-ui-extension node scripts/release-assets.mjs
+RELEASE_TAG=v0.2.0 RELEASE_REPOSITORY=rodrigogeromin/argocd-swagger-ui-extension node scripts/release-assets.mjs
 (cd dist && sha256sum --check checksums.txt)
 ```
 
@@ -39,17 +41,17 @@ O patch assume Deployment `argocd/argocd-server`, container `argocd-server` e vo
 Baixe uma tag específica e confira o checksum antes de revisar/aplicar:
 
 ```sh
-gh release download v0.1.0 --repo rodrigogeromin/argocd-swagger-ui-extension \
+gh release download v0.2.0 --repo rodrigogeromin/argocd-swagger-ui-extension \
   --pattern swagger-gateway.tar.gz --pattern checksums.txt \
   --pattern argocd-server-patch.yaml --pattern validation-report.json \
-  --pattern installation.md --dir release-v0.1.0
-(cd release-v0.1.0 && sha256sum --check checksums.txt)
+  --pattern installation.md --dir release-v0.2.0
+(cd release-v0.2.0 && sha256sum --check checksums.txt)
 kubectl get deployment argocd-server -n argocd -o yaml > argocd-server-before.yaml
 # Revise o patch e adapte a fonte de configuração do ambiente antes de aplicar.
 kubectl patch deployment argocd-server -n argocd --type strategic \
-  --patch-file release-v0.1.0/argocd-server-patch.yaml --dry-run=server -o yaml
+  --patch-file release-v0.2.0/argocd-server-patch.yaml --dry-run=server -o yaml
 kubectl patch deployment argocd-server -n argocd --type strategic \
-  --patch-file release-v0.1.0/argocd-server-patch.yaml
+  --patch-file release-v0.2.0/argocd-server-patch.yaml
 kubectl rollout status deployment/argocd-server -n argocd
 ```
 
@@ -57,7 +59,7 @@ O merge estratégico preserva containers, init containers e volumes de outros no
 
 Em instalações gerenciadas por Helm ou GitOps, registre o init container e o volume compartilhado nos values/manifests da fonte de verdade e faça a reconciliação por esse fluxo. Um patch manual pode ser revertido pelo controlador. Não aplique o exemplo sem adaptar namespace, Deployment, container e volume ao ambiente.
 
-Após rollout, confira os logs do init container e o arquivo em todos os pods do servidor; recarregue o navegador, abra a Application `argocd/swagger-gateway`, projeto `appset`, clique em Swagger e teste seleção/atualização das publicações e falhas de autorização. Esse teste real deve ser registrado separadamente; não transforme evidência local em comprovação de integração.
+Após rollout, confira os logs do init container e o arquivo em todos os pods do servidor; recarregue o navegador e abra Swagger no menu lateral, rota `/swagger`, sem selecionar Application e teste seleção/atualização das publicações e falhas de autorização. Esse teste real deve ser registrado separadamente; não transforme evidência local em comprovação de integração.
 
 ## Gateway, proxy, RBAC e segurança
 
@@ -65,7 +67,7 @@ O gateway precisa servir catálogo, HTML e specs pelo Proxy Extension `swagger`,
 
 O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não aceite HTML arbitrário de upstreams. A CSP deve permitir os recursos da CDN versionada usados pelo gateway; revise as diretivas necessárias segundo a política do ambiente, sem desabilitar a CSP globalmente. Try it out permanece desabilitado. Não inclua credenciais no bundle ou no patch. Preserve o contexto autorizado da PoC e valide RBAC de Application/extensão antes de ampliar acesso.
 
-## Instalação observada
+## Instalação histórica observada (v0.1.0)
 
 A release v0.1.0 foi instalada no Deployment `argocd/argocd-server`, Argo CD 3.5.1, contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; o instalador validou o checksum, e o hash no pod e o bundle servido por `/extensions.js` correspondem à release. Catálogo e docs das duas publicações responderam 200 pelo proxy autenticado. Instaladores anteriores foram preservados.
 

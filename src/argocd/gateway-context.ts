@@ -1,15 +1,14 @@
-import type {Application} from './types';
-
 export interface GatewayContext {
   readonly application: string;
   readonly project: string;
 }
 
-export function gatewayContext(application?: Application): GatewayContext | undefined {
-  if (application?.metadata?.name !== 'swagger-gateway' ||
-      application.metadata.namespace !== 'argocd' || application.spec?.project !== 'appset') return undefined;
-  return {application: `${application.metadata.namespace}:${application.metadata.name}`, project: application.spec.project};
-}
+// Explicit PoC routing context, independent of host Application selection.
+// The backend still authorizes the user's session and RBAC for every request.
+export const gatewayContext: GatewayContext = Object.freeze({
+  application: 'argocd:swagger-gateway',
+  project: 'appset'
+});
 
 export function argoBasePath(): string {
   const base = new URL(document.querySelector('base')?.getAttribute('href') || '/', window.location.origin);

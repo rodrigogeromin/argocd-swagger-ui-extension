@@ -142,12 +142,13 @@
     }
   ],
   "review": {
-    "profile": "top-bar-action",
-    "consumerSource": "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/applications/components/application-details/application-details.tsx",
-    "consumerSha256": "5fc633882f3884a65cd1cac0e31c183b883e1baf002e2081d6abbc250f20d28c",
+    "profile": "system-level",
+    "consumerSource": "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/app.tsx",
+    "consumerSha256": "6fca320454a5f02f89ef9ab8b040846d63dd9ef47a60db6883a24237bf67ccc8",
     "notes": [
       "Verified full extension service and bootstrap, package manifest and resolved React/DOM/types entries in pnpm lock.",
-      "Host owns action/icon/flyout; main gets application/tree/openFlyout, flyout only application/tree.",
+      "onAddSystemLevelExtension registers sidebar title/path and iconClassName `fa ${extension.icon}`; Page renders the extension component without props.",
+      "Explicit immutable PoC context argocd:swagger-gateway / appset is supplied by the adapter; session and server-side RBAC remain authoritative.",
       "React/DOM 19.2.6; types 19.2.14/19.2.3; automatic JSX via ReactJSXRuntime."
     ]
   }

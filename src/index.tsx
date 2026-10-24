@@ -1,3 +1,2 @@
-import {register} from './argocd/register';
-import {Extension} from './app/Extension';
-register(Extension);
+import {register, HostPage} from './argocd/register';
+register(HostPage);

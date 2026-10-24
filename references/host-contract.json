@@ -7,14 +7,10 @@
     "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/package.json",
     "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/pnpm-lock.yaml"
   ],
-  "profile": "top-bar-action",
-  "method": "registerTopBarActionMenuExt",
-  "signature": "registerTopBarActionMenuExt(component, title, id, flyout, shouldDisplay?, iconClassName?, isMiddle?)",
-  "props": [
-    "application",
-    "tree",
-    "openFlyout"
-  ],
+  "profile": "system-level",
+  "method": "registerSystemLevelExtension",
+  "signature": "registerSystemLevelExtension(component, title, path, icon)",
+  "props": [],
   "globals": [
     "React",
     "ReactDOM",
@@ -24,16 +20,10 @@
   "argumentMap": [
     "component",
     "registration.title",
-    "registration.id",
-    "component.flyout",
-    "callback.shouldDisplay",
-    "registration.icon",
-    "registration.isMiddle"
+    "registration.path",
+    "registration.icon"
   ],
-  "flyoutProps": [
-    "application",
-    "tree"
-  ],
+  "flyoutProps": [],
   "runtime": {
     "react": "19.2.6",
     "reactDom": "19.2.6",

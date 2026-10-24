@@ -8,7 +8,7 @@ module.exports = (_, argv) => {
   return {
     mode: production ? 'production' : 'development',
     entry: production ? './src/index.tsx' : './dev/main.tsx',
-    output: {path: path.resolve(__dirname, production ? 'dist/resources' : 'dist/preview'), filename: production ? `extension-${config.name}.js` : 'preview.js', clean: true},
+    output: {path: path.resolve(__dirname, production ? 'dist/resources' : 'dist/preview'), filename: production ? `extension-${config.name}.js` : 'preview.js', ...(production ? {} : {publicPath: '/'}), clean: true},
     devtool: false,
     resolve: {extensions: ['.tsx', '.ts', '.js']},
     module: {rules: [
@@ -23,6 +23,6 @@ module.exports = (_, argv) => {
         fs.writeFileSync(path.resolve(__dirname, 'dist/build-modules.json'), JSON.stringify(json, null, 2));
       });}}
     ] : [new HtmlWebpackPlugin({template: './dev/index.html'})])],
-    devServer: {host: '127.0.0.1', port: 8080, allowedHosts: ['localhost', '127.0.0.1']}
+    devServer: {historyApiFallback: true, host: '127.0.0.1', port: 8080, allowedHosts: ['localhost', '127.0.0.1']}
   };
 };
