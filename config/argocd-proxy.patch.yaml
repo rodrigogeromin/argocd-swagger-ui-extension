@@ -1,0 +1,6 @@
+# Merge patch; preserves unrelated argocd-cm keys and proxy extensions.
+data:
+  extension.config.swagger: |
+    connectionTimeout: 5s
+    services:
+      - url: http://swagger-gateway.swagger-gateway.svc.cluster.local:8080

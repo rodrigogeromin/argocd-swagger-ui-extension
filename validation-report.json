@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T01:10:56.482Z",
+  "environment": {
+    "node": "v26.10.0",
+    "npm": "11.19.1",
+    "platform": "linux"
+  },
+  "identity": {
+    "project": "swagger-gateway",
+    "target": "3.5.1",
+    "profile": "top-bar-action",
+    "sourceTag": "v3.5.1",
+    "sources": [
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/shared/services/extensions-service.ts",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/index.tsx",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/package.json",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/pnpm-lock.yaml"
+    ],
+    "signature": "registerTopBarActionMenuExt(component, title, id, flyout, shouldDisplay?, iconClassName?, isMiddle?)",
+    "props": [
+      "application",
+      "tree",
+      "openFlyout"
+    ],
+    "globals": [
+      "React",
+      "ReactDOM",
+      "ReactJSXRuntime"
+    ],
+    "runtime": {
+      "react": "19.2.6",
+      "reactDom": "19.2.6",
+      "typesReact": "19.2.14",
+      "typesReactDom": "19.2.3"
+    },
+    "flyoutProps": [
+      "application",
+      "tree"
+    ],
+    "localRuntime": {
+      "react": "19.2.6",
+      "react-dom": "19.2.6",
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3",
+      "@testing-library/react": "16.3.2"
+    },
+    "configuredRuntime": {
+      "react": "19.2.6",
+      "react-dom": "19.2.6",
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3"
+    },
+    "templateVersion": "2.2.1",
+    "templateRevision": "a025a4141f3f42926d12fb37f1ceb7c2fbeda736e4466ce228c4118059fef803",
+    "sourceRevision": "5c6cbc5d5ac330dfdb47ddf1ba87d104665f7c6cfe3b707a8e9a25989bddd3bf",
+    "bundleSha256": "18226ac5e7530c8d86c18a9ee4366b3fff798818974237836b5657367009c5ab",
+    "packageSha256": "d4041e1bd8805ce0338b577e54afb1ccf836294397fcb410660311e5982926f9"
+  },
+  "configuration": {
+    "status": "passed"
+  },
+  "artifacts": {
+    "status": "validated",
+    "reason": null
+  },
+  "checks": [
+    {
+      "command": "npm run typecheck",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run lint",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run test",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run package",
+      "status": "passed",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run harness",
+      "status": "passed",
+      "exitCode": 0
+    }
+  ],
+  "harness": {
+    "status": "passed",
+    "kind": "simulated host globals; not Argo CD integration"
+  },
+  "integration": {
+    "status": "not-run",
+    "reason": "No 3.5.1 host was installed/tested by local validation"
+  },
+  "integratedVersions": [],
+  "releaseComplete": false
+}

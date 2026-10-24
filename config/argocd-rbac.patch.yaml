@@ -1,0 +1,5 @@
+# Extension invoke permissions are explicit, including for role:admin.
+# A separate policy fragment preserves existing policies.
+data:
+  policy.swagger.csv: |
+    p, role:admin, extensions, invoke, swagger, allow

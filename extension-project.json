@@ -1,0 +1,76 @@
+{
+  "name": "swagger-gateway",
+  "description": "Browse OpenAPI publications through the authenticated Argo CD Swagger Gateway proxy.",
+  "argoCdVersion": "3.5.1",
+  "profile": "top-bar-action",
+  "registration": {
+    "title": "Swagger",
+    "id": "swagger-gateway",
+    "icon": "fa fa-book",
+    "isMiddle": true,
+    "shouldDisplay": true,
+    "flyout": true
+  },
+  "dataSource": "proxy",
+  "backend": {
+    "kind": "proxy"
+  },
+  "schemaVersion": 2,
+  "templateVersion": "2.2.1",
+  "hostContract": {
+    "sourceKind": "official",
+    "tag": "v3.5.1",
+    "sources": [
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/shared/services/extensions-service.ts",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/src/app/index.tsx",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/package.json",
+      "https://github.com/argoproj/argo-cd/blob/v3.5.1/ui/pnpm-lock.yaml"
+    ],
+    "profile": "top-bar-action",
+    "method": "registerTopBarActionMenuExt",
+    "signature": "registerTopBarActionMenuExt(component, title, id, flyout, shouldDisplay?, iconClassName?, isMiddle?)",
+    "props": [
+      "application",
+      "tree",
+      "openFlyout"
+    ],
+    "globals": [
+      "React",
+      "ReactDOM",
+      "ReactJSXRuntime"
+    ],
+    "jsxMode": "automatic",
+    "argumentMap": [
+      "component",
+      "registration.title",
+      "registration.id",
+      "component.flyout",
+      "callback.shouldDisplay",
+      "registration.icon",
+      "registration.isMiddle"
+    ],
+    "flyoutProps": [
+      "application",
+      "tree"
+    ],
+    "runtime": {
+      "react": "19.2.6",
+      "reactDom": "19.2.6",
+      "typesReact": "19.2.14",
+      "typesReactDom": "19.2.3"
+    }
+  },
+  "origin": {
+    "templateSha256": "a025a4141f3f42926d12fb37f1ceb7c2fbeda736e4466ce228c4118059fef803",
+    "adaptations": [
+      "Swagger catalog and trusted HTML flyout using authenticated proxy, base-href-aware paths, cancellation and context validation.",
+      "Host-owned top bar action restricted to argocd:swagger-gateway in appset; domain and production bundle tests replace scaffold assertions.",
+      "Node 26.10.0/npm 11.19.1 and webpack-dev-server 6.1.0; patched transitive development dependencies."
+    ]
+  },
+  "compatibility": {
+    "localBuild": "not-run",
+    "harness": "not-run",
+    "integrated": []
+  }
+}

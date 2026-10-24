@@ -1,0 +1,3 @@
+# Restart argocd-server after enabling this environment-backed feature flag.
+data:
+  server.enable.proxy.extension: "true"
