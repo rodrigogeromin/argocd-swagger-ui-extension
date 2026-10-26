@@ -12,7 +12,7 @@ A correção **v0.2.1** aguarda o primeiro commit do host em `#app` antes de reg
 2. Selecione a publicação Go ou Java. O HTML universal do gateway é carregado na página, via `fetch` autenticado e `iframe.srcdoc`.
 3. Use **Atualizar catálogo** para recarregar. Falhas de sessão, permissão, catálogo inválido e indisponibilidade têm mensagens próprias.
 
-O adapter fornece explicitamente o contexto fixo `argocd:swagger-gateway` / `appset`, sem depender de Application selecionada. O menu aparece sem contexto de Application; a sessão e o RBAC do backend autorizam as requisições. Requisições são canceladas ao sair da página, atualizar ou trocar a seleção. URLs respeitam o `<base href>` do Argo CD, incluindo instalações sob `/argocd/`.
+O adapter lê `application` e `project` do JavaScript `extension-0-swagger-gateway-config.js`, montado pelo ConfigMap de cada instalação. O menu aparece sem contexto de Application; a sessão e o RBAC do backend autorizam as requisições. Requisições são canceladas ao sair da página, atualizar ou trocar a seleção. URLs respeitam o `<base href>` do Argo CD, incluindo instalações sob `/argocd/`.
 
 ## Desenvolvimento e verificação
 
@@ -29,7 +29,7 @@ O preview em `http://127.0.0.1:8080` usa exclusivamente mocks locais do gateway.
 - `?fixture=empty`: catálogo vazio.
 - `?fixture=denied`: acesso negado.
 - `?fixture=error`: gateway indisponível.
-- `?fixture=absent`: página sem Application selecionada; usa o contexto explícito da PoC.
+- `?fixture=absent`: página sem Application selecionada.
 - `?theme=dark&width=390px&height=844px`: viewport estreito e tema escuro.
 
 A CDN do Swagger UI precisa estar acessível para a documentação renderizar no preview. Mocks nunca entram no bundle de produção.
@@ -61,11 +61,13 @@ gh run download RUN_ID --repo rodrigogeromin/argocd-swagger-ui-extension \
   --name swagger-gateway-extension --dir artifacts
 ```
 
-O workflow `release.yml` publica por tag `v` + `package.json.version`, após validar a identidade, executar `validate` e conferir as evidências. Anexa `swagger-gateway.tar.gz`, `checksums.txt`, `argocd-server-patch.yaml`, `validation-report.json` e `installation.md`. Atualize a versão e o lockfile, valide e envie o commit antes de criar/enviar a tag correspondente. O [manual de publicação e instalação](docs/installation.md) contém os comandos e a revisão necessária do patch.
+O workflow `release.yml` publica por tag `v` + `package.json.version`, após validar a identidade, executar `validate` e conferir as evidências. Anexa `swagger-gateway.tar.gz`, `checksums.txt`, `argocd-server-patch.yaml`, `swagger-gateway-config.yaml`, `validation-report.json` e `installation.md`. Atualize a versão e o lockfile, valide e envie o commit antes de criar/enviar a tag correspondente. O [manual de publicação e instalação](docs/installation.md) contém os comandos e a revisão necessária do patch.
 
-A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. O patch estratégico da release acrescenta o init container exclusivo do Swagger, com imagem fixada por digest, checksum habilitado e volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Depois da instalação, recarregue a interface e abra Swagger no menu lateral, rota `/swagger`, sem selecionar Application. Gateway, proxy e RBAC continuam separados.
+A instalação exige que o JavaScript esteja sob `/tmp/extensions/` em **todos** os pods `argocd-server`. Antes do patch, edite `deploy/swagger-gateway-config.yaml` com o Application no formato `namespace:name` e seu Project, e aplique o ConfigMap. O patch estratégico monta esse arquivo somente leitura antes do bundle, além de acrescentar o init container e o volume `/tmp` compartilhado. Preserve outras extensões e adapte volumes existentes e a fonte Helm/GitOps antes de aplicar. Reinicie `argocd-server` após alterar o ConfigMap. Gateway, proxy e RBAC continuam separados.
 
 A release **v0.2.1** foi publicada e instalada no mesmo Argo CD 3.5.1, contexto `k3d-dev`, corrigindo a sequência de registro. Rollout 1/1 Ready, checksum, hash no pod e bundle exato servido foram conferidos; catálogo e docs Go/Java passaram pelo proxy autenticado. Os testes reproduziram a falha anterior e passaram com o carregamento antes e depois da montagem do host. A execução do JavaScript completo servido também foi conferida em jsdom, mantendo essa evidência separada de um navegador real. Veja as [evidências v0.2.1](docs/evidence/installation-v0.2.1-k3d-dev.json).
+
+A configuração por instalação foi montada no cluster local `k3d-argocd-lab` com o bundle final compilado. O ConfigMap foi alternado de `argocd:swagger-gateway` para a Application existente `argocd:swagger-petstore`; o `/extensions.js` servido incluiu essa configuração antes do bundle, e o harness confirmou os headers configurados. O contexto funcional original foi restaurado após o teste. O cluster está em Argo CD 3.5.6, diferente do contrato auditado 3.5.1; não foi adicionado à matriz de integração. A chamada autenticada pelo navegador não foi executada. [Registro do teste](docs/evidence/runtime-config-k3d-argocd-lab.json).
 
 A release **v0.2.0** (system-level) foi publicada e instalada no Argo CD 3.5.1 do contexto `k3d-dev`. O rollout concluiu com 1/1 Ready; hash no pod, bundle exato servido, ausência do antigo bundle Top Bar do Swagger e catálogo/specs autenticados foram conferidos. Outras extensões foram preservadas. Depois dessa instalação, o usuário relatou que Swagger não apareceu no menu lateral; os checks HTTP não comprovaram a inscrição da página. Veja as [evidências v0.2.0](docs/evidence/installation-v0.2.0-k3d-dev.json).
 
@@ -75,7 +77,7 @@ Registro histórico: a release **v0.1.0 foi instalada persistentemente no Argo C
 
 ## Pré-requisitos do gateway
 
-O gateway deve implementar `GET /api/v1/catalog`, `GET /ui/{id}` e `GET /specs/{id}` com o contrato da PoC, sob o único Proxy Extension `swagger`. A Application autorizada é `argocd:swagger-gateway`, projeto `appset`; o catálogo retorna `application`, `project`, `namespace`, `id`, `title`, `uiUrl` e `specUrl`. IDs são simples e URLs públicas são relativas sob `/extensions/swagger`.
+O gateway deve implementar `GET /api/v1/catalog`, `GET /ui/{id}` e `GET /specs/{id}` com o contrato da PoC, sob o único Proxy Extension `swagger`. O Application e Project configurados no ConfigMap definem o contexto dos headers do proxy; os metadados `application` e `project` de cada publicação são independentes. O catálogo retorna `application`, `project`, `namespace`, `id`, `title`, `uiUrl` e `specUrl`. IDs são simples e URLs públicas são relativas sob `/extensions/swagger`.
 
 Os merge patches em `config/` documentam a configuração já usada pela PoC e preservam chaves não relacionadas:
 
@@ -87,7 +89,7 @@ kubectl patch configmap argocd-rbac-cm -n argocd --type merge --patch-file confi
 
 Reinicie `argocd-server` se estiver habilitando pela primeira vez o feature flag do proxy. Não é necessário reinstalar ou reconfigurar o backend ao alternar publicações.
 
-A regra RBAC de exemplo autoriza `role:admin` a invocar somente `swagger`. Outros usuários precisam de permissões específicas de Application e extensão. O contexto fixo no frontend não substitui a autorização server-side.
+A regra RBAC de exemplo autoriza `role:admin` a invocar somente `swagger`. Outros usuários precisam de permissões específicas de Application e extensão. O contexto do ConfigMap no frontend não substitui a autorização server-side.
 
 ## Limites da PoC
 

@@ -4,13 +4,15 @@ const signal = () => new AbortController().signal;
 afterEach(() => jest.useRealTimers());
 test.each([
   {items:[{...publications[0],uiUrl:'https://outside.example/api'}]},
-  {items:[{...publications[0],project:'other'}]},
-  {items:[{...publications[0],application:'other'}]},
   {items:[publications[0],publications[0]]},
   {items:[{id:'incomplete'}]}, {items:'wrong'}, {}, 'not-json'
 ])('rejects invalid or unauthorized catalog: %j', async body => {
   global.fetch = jest.fn().mockResolvedValue(response(body));
   await expect(loadCatalog(context,signal())).rejects.toThrow();
+});
+test('accepts catalog entries with independent publication ownership', async () => {
+  global.fetch = jest.fn().mockResolvedValue(response({items:publications}));
+  await expect(loadCatalog(context,signal())).resolves.toEqual(publications);
 });
 test.each([400,401,403,404,500,502,504])('handles HTTP %i', async status => {
   global.fetch = jest.fn().mockResolvedValue(response('private detail',status));

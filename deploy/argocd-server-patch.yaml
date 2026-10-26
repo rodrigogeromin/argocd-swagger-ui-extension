@@ -44,6 +44,13 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+            - name: swagger-gateway-config
+              mountPath: /tmp/extensions/resources/extension-0-swagger-gateway-config.js
+              subPath: extension-0-swagger-gateway-config.js
+              readOnly: true
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: swagger-gateway-config
+          configMap:
+            name: swagger-gateway-config

@@ -5,6 +5,7 @@ import project from '../extension-project.json';
 import './preview.css';
 import {installPreviewGateway} from './mock-gateway';
 installPreviewGateway();
+window.swaggerGatewayConfig = Object.freeze({application:'argocd:swagger-gateway',project:'appset'});
 const query = new URLSearchParams(location.search);
 const element = document.getElementById('root');
 if (!element) throw new Error('Missing preview root');

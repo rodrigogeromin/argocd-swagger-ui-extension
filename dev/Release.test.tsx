@@ -7,6 +7,7 @@ import {join, resolve} from 'node:path';
 
 const helper = resolve('scripts/release-assets.mjs');
 const template = resolve('deploy/argocd-server-patch.yaml');
+const configTemplate = resolve('deploy/swagger-gateway-config.yaml');
 let fixture: string;
 beforeEach(() => {
   fixture = mkdtempSync(join(tmpdir(), 'swagger-release-'));
@@ -14,6 +15,7 @@ beforeEach(() => {
   mkdirSync(join(fixture, 'dist'));
   writeFileSync(join(fixture, 'package.json'), JSON.stringify({version: '0.1.0'}));
   copyFileSync(template, join(fixture, 'deploy/argocd-server-patch.yaml'));
+  copyFileSync(configTemplate, join(fixture, 'deploy/swagger-gateway-config.yaml'));
 });
 afterEach(() => rmSync(fixture, {recursive: true, force: true}));
 function run(tag = 'v0.1.0', repository = 'rodrigogeromin/argocd-swagger-ui-extension', args: string[] = []) {
@@ -37,6 +39,9 @@ test('prepares checksum from actual package bytes and immutable release URLs', (
   expect(patch).toContain('name: EXTENSION_CHECKSUM_URL');
   expect(patch).toContain('name: argocd-extension-installer-swagger-gateway');
   expect(patch).not.toMatch(/__TAG__|__REPOSITORY__/);
+  const config = readFileSync(output('swagger-gateway-config.yaml'), 'utf8');
+  expect(config).toContain('window.swaggerGatewayConfig');
+  expect(config).toContain('extension-0-swagger-gateway-config.js');
 });
 
 test.each(['v0.2.0', '0.1.0', 'v0.1.0\n', 'v0.1.0;echo unsafe'])('rejects incompatible tag %p before preparing assets', tag => {
@@ -63,4 +68,5 @@ test('missing archive fails without writing release assets', () => {
   expect(run().status).not.toBe(0);
   expect(existsSync(output('checksums.txt'))).toBe(false);
   expect(existsSync(output('argocd-server-patch.yaml'))).toBe(false);
+  expect(existsSync(output('swagger-gateway-config.yaml'))).toBe(false);
 });

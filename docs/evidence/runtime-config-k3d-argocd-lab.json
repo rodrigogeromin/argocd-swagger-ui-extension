@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-26T15:53:10Z",
+  "host": {
+    "context": "k3d-argocd-lab",
+    "namespace": "argocd",
+    "deployment": "argocd-server",
+    "argoCdVersion": "3.5.6",
+    "image": "quay.io/argoproj/argocd:v3.5.6",
+    "readyReplicas": 1
+  },
+  "targetContract": {
+    "argoCdVersion": "3.5.1",
+    "integratedVersions": []
+  },
+  "artifacts": {
+    "bundleSha256": "d91b7465eee3198274cc5da871c75d349c94e627d9fc4c635c3b657c159b414e",
+    "packageSha256": "0e4c5db23c2181b5d5b38dc7cc45dd17226dd8f28f664d87d2527e80b517412a",
+    "podBundleSha256MatchesLocal": true
+  },
+  "runtimeConfig": {
+    "configMap": "swagger-gateway-config",
+    "mountPath": "/tmp/extensions/resources/extension-0-swagger-gateway-config.js",
+    "testedContext": {
+      "application": "argocd:swagger-petstore",
+      "project": "appset",
+      "applicationExists": true
+    },
+    "restoredContext": {
+      "application": "argocd:swagger-gateway",
+      "project": "appset"
+    },
+    "servedExtensionsJs": {
+      "bytes": 14143,
+      "configGlobalIndex": 120,
+      "bundleMarkerIndex": 6396,
+      "configPrecedesBundle": true
+    },
+    "rollout": "passed"
+  },
+  "requestVerification": {
+    "productionBundleHarness": {
+      "command": "npm run validate",
+      "status": "passed",
+      "requestHeaders": {
+        "Argocd-Application-Name": "argocd:swagger-petstore",
+        "Argocd-Project-Name": "appset"
+      },
+      "publicationOwnershipIndependentFromProxyContext": true
+    },
+    "authenticatedLiveProxyRequest": "not-run",
+    "browser": "not-run"
+  },
+  "note": "The final bundle was observed in the local cluster with the alternate Application context; `/extensions.js` contained the configuration before the bundle. The production bundle harness verified the alternate request headers. The ConfigMap and deployment were restored to argocd:swagger-gateway / appset after the test. The cluster runs Argo CD 3.5.6 while the project's audited host contract is 3.5.1; no integrated version was added. The local deployment remains overlaid with the test bundle ConfigMap."
+}

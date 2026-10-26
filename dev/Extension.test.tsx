@@ -2,12 +2,12 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, screen, fireEvent, waitFor} from '@testing-library/react';
 import {register, HostPage} from '../src/argocd/register';
-import {argoBasePath, gatewayContext} from '../src/argocd/gateway-context';
+import {argoBasePath, readGatewayContext} from '../src/argocd/gateway-context';
 import type {ExtensionsAPI} from '../src/argocd/types';
 import {gatewayFetch, response, publications, html} from './test-fixtures';
 
-beforeEach(() => { global.fetch = gatewayFetch() as unknown as typeof fetch; });
-afterEach(() => { document.querySelector('base')?.remove(); jest.restoreAllMocks(); });
+beforeEach(() => { global.fetch = gatewayFetch() as unknown as typeof fetch; window.swaggerGatewayConfig = {application:'argocd:swagger-gateway',project:'appset'}; });
+afterEach(() => { document.querySelector('base')?.remove(); delete window.swaggerGatewayConfig; jest.restoreAllMocks(); });
 
 test('adapter registers exactly one independent system page and no Top Bar action', () => {
   const host = jest.fn();
@@ -21,13 +21,15 @@ test('adapter registers exactly one independent system page and no Top Bar actio
   expect(() => register(HostPage)).toThrow('extensionsAPI');
 });
 
-test('explicit PoC proxy context is immutable', () => {
-  expect(gatewayContext).toEqual({application:'argocd:swagger-gateway',project:'appset'});
-  expect(Object.isFrozen(gatewayContext)).toBe(true);
+test('reads and freezes alternate runtime proxy context', () => {
+  window.swaggerGatewayConfig = {application:'team-a:catalog',project:'platform'};
+  const context = readGatewayContext();
+  expect(context).toEqual({application:'team-a:catalog',project:'platform'});
+  expect(Object.isFrozen(context)).toBe(true);
 });
 
 test('loads catalog and HTML with auth headers, switches publication and clears stale iframe', async () => {
-  const before = JSON.stringify(gatewayContext);
+  const before = JSON.stringify(window.swaggerGatewayConfig);
   render(<HostPage />);
   expect(screen.getByRole('status')).toHaveTextContent('Carregando catálogo');
   const frame = await screen.findByTitle('Documentação Go demo');
@@ -36,7 +38,32 @@ test('loads catalog and HTML with auth headers, switches publication and clears 
   fireEvent.change(screen.getByLabelText('API publicada'), {target: {value: 'java-demo'}});
   await screen.findByTitle('Documentação Java demo');
   expect(screen.queryByTitle('Documentação Go demo')).not.toBeInTheDocument();
-  expect(JSON.stringify(gatewayContext)).toBe(before);
+  expect(JSON.stringify(window.swaggerGatewayConfig)).toBe(before);
+});
+
+test('uses alternate runtime context and accepts publications owned elsewhere', async () => {
+  window.swaggerGatewayConfig = {application:'team-a:catalog',project:'platform'};
+  render(<HostPage />);
+  await screen.findByTitle('Documentação Go demo');
+  expect(fetch).toHaveBeenCalledWith('/extensions/swagger/api/v1/catalog', expect.objectContaining({headers:{'Argocd-Application-Name':'team-a:catalog','Argocd-Project-Name':'platform'}}));
+});
+
+test('missing or invalid runtime config shows setup error without gateway requests', async () => {
+  delete window.swaggerGatewayConfig;
+  render(<HostPage />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('application e project');
+  expect(fetch).not.toHaveBeenCalled();
+  expect(() => readGatewayContext({application:'',project:'appset'})).toThrow('inválida');
+});
+
+test('malformed runtime config shows setup error without gateway requests', async () => {
+  window.swaggerGatewayConfig = {application:'team-a',project:'appset'};
+  render(<HostPage />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('Configuração Swagger Gateway inválida');
+  expect(fetch).not.toHaveBeenCalled();
+  expect(() => readGatewayContext({application:'team-a:catalog:extra',project:'appset'})).toThrow('inválida');
+  expect(() => readGatewayContext({application:':catalog',project:'appset'})).toThrow('inválida');
+  expect(() => readGatewayContext({application:'team-a:',project:'appset'})).toThrow('inválida');
 });
 
 test('honors Argo base href for both bootstrap and iframe spec fetches', async () => {

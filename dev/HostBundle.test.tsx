@@ -15,9 +15,11 @@ afterEach(async () => {
   root = undefined;
   document.body.replaceChildren();
   delete window.extensionsAPI;
+  delete window.swaggerGatewayConfig;
 });
 
 test.each(['early', 'ready'])('production bundle loaded with %s host registers once and preserves authenticated data flow', async phase => {
+  window.swaggerGatewayConfig = {application:'argocd:swagger-petstore',project:'appset'};
   global.fetch = gatewayFetch() as unknown as typeof fetch;
   const globals = window as unknown as Record<string, unknown>;
   globals.React = React; globals.ReactDOM = ReactDOM; globals.ReactJSXRuntime = jsxRuntime;
@@ -63,7 +65,7 @@ test.each(['early', 'ready'])('production bundle loaded with %s host registers o
   expect(screen.getByRole('main', {name: 'Swagger'})).toBeInTheDocument();
   expect(document.querySelector('i')).toHaveClass('fa', 'fa-book');
   await screen.findByTitle('Documentação Go demo');
-  expect(fetch).toHaveBeenCalledWith('/extensions/swagger/api/v1/catalog', expect.objectContaining({credentials: 'same-origin', headers: {'Argocd-Application-Name': 'argocd:swagger-gateway', 'Argocd-Project-Name': 'appset'}}));
+  expect(fetch).toHaveBeenCalledWith('/extensions/swagger/api/v1/catalog', expect.objectContaining({credentials: 'same-origin', headers: {'Argocd-Application-Name': 'argocd:swagger-petstore', 'Argocd-Project-Name': 'appset'}}));
   fireEvent.change(screen.getByLabelText('API publicada'), {target: {value: 'java-demo'}});
   await screen.findByTitle('Documentação Java demo');
   expect(screen.queryByTitle('Documentação Go demo')).not.toBeInTheDocument();
@@ -75,4 +77,5 @@ test.each(['early', 'ready'])('production bundle loaded with %s host registers o
   expect(registration).toHaveBeenCalledTimes(1);
   expect(screen.getAllByRole('link', {name: 'Swagger'})).toHaveLength(1);
   expect(globals.React).toBe(React); expect(globals.ReactDOM).toBe(ReactDOM); expect(globals.ReactJSXRuntime).toBe(jsxRuntime);
+  delete window.swaggerGatewayConfig;
 });

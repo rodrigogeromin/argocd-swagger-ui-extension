@@ -1,13 +1,17 @@
-import {createElement} from 'react';
+import {createElement, useState} from 'react';
 import type {ComponentType} from 'react';
-import {gatewayContext, argoBasePath} from './gateway-context';
+import {readGatewayContext, argoBasePath} from './gateway-context';
 import type {ProjectRegistration} from './types';
 import project from '../../extension-project.json';
 import {Extension} from '../app/Extension';
 
 // Argo CD system pages are rendered without Application or tree props.
 export function HostPage() {
-  return createElement(Extension, {context: gatewayContext, basePath: argoBasePath()});
+  const [configuration] = useState<{context?: ReturnType<typeof readGatewayContext>; configError?: string}>(() => {
+    try { return {context: readGatewayContext()}; }
+    catch (error) { return {configError: (error as Error).message}; }
+  });
+  return createElement(Extension, {...configuration, basePath: argoBasePath()});
 }
 
 export function register(component: ComponentType): void {

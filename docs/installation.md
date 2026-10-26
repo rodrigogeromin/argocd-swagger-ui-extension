@@ -22,6 +22,7 @@ Substitua `VERSAO` pela mesma versão SemVer em todos os comandos. O workflow `r
 - `swagger-gateway.tar.gz`: somente `resources/extension-swagger-gateway.js`.
 - `checksums.txt`: SHA-256 do pacote real, no formato aceito pelo instalador.
 - `argocd-server-patch.yaml`: patch com URLs do repositório e tag dessa release.
+- `swagger-gateway-config.yaml`: exemplo de ConfigMap com Application e Project configuráveis.
 - `validation-report.json`: evidências locais e harness, sem certificação de integração.
 - `installation.md`: este manual.
 
@@ -36,14 +37,24 @@ Use a versão corrente do `package.json`. `--validate-only` confere identidade s
 
 ## Revisar e instalar
 
-O patch assume Deployment `argocd/argocd-server`, container `argocd-server` e volume `tmp` do tipo `emptyDir`, compartilhado em `/tmp`. O init container exclusivo `argocd-extension-installer-swagger-gateway` usa a imagem oficial v1.1.0 fixada por digest, verifica `EXTENSION_CHECKSUM_URL` e instala em `/tmp/extensions/resources`. Os pods precisam alcançar GitHub para baixar assets e Quay para obter a imagem.
+O patch assume Deployment `argocd/argocd-server`, container `argocd-server` e volume `tmp` do tipo `emptyDir`, compartilhado em `/tmp`. O init container exclusivo `argocd-extension-installer-swagger-gateway` usa a imagem oficial v1.1.0 fixada por digest, verifica `EXTENSION_CHECKSUM_URL` e instala em `/tmp/extensions/resources`. Os pods precisam alcançar GitHub para baixar assets e Quay para obter a imagem. A configuração de proxy é um ConfigMap separado e deve ser criado antes do patch.
+
+Edite `deploy/swagger-gateway-config.yaml` (ou `release-v0.2.1/swagger-gateway-config.yaml` ao instalar a partir da release baixada) para definir `application` no formato `namespace:name` e o `project` existente que o proxy deve usar. A extensão carrega esse JavaScript antes do bundle e mantém os valores imutáveis durante a renderização. Applications e Projects nos metadados das publicações podem ser diferentes. A ausência de configuração mostra uma mensagem de setup e não envia requisições.
+
+```sh
+kubectl apply -f deploy/swagger-gateway-config.yaml
+# Ao instalar a partir dos assets baixados, use no lugar da linha acima:
+# kubectl apply -f release-v0.2.1/swagger-gateway-config.yaml
+```
+
+Após alterar o ConfigMap, reinicie `argocd-server` para que os pods montem a configuração atualizada e regenerem `/extensions.js`.
 
 Baixe uma tag específica e confira o checksum antes de revisar/aplicar:
 
 ```sh
 gh release download v0.2.1 --repo rodrigogeromin/argocd-swagger-ui-extension \
   --pattern swagger-gateway.tar.gz --pattern checksums.txt \
-  --pattern argocd-server-patch.yaml --pattern validation-report.json \
+  --pattern argocd-server-patch.yaml --pattern swagger-gateway-config.yaml --pattern validation-report.json \
   --pattern installation.md --dir release-v0.2.1
 (cd release-v0.2.1 && sha256sum --check checksums.txt)
 kubectl get deployment argocd-server -n argocd -o yaml > argocd-server-before.yaml
@@ -65,7 +76,13 @@ Após rollout, confira os logs do init container e o arquivo em todos os pods do
 
 O gateway precisa servir catálogo, HTML e specs pelo Proxy Extension `swagger`, com contexto de Application e permissões server-side. Consulte o [README](../README.md#pré-requisitos-do-gateway) e os patches em `config/` no repositório da tag. Instalar a UI não habilita o proxy, não implanta backend e não concede RBAC.
 
-O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não aceite HTML arbitrário de upstreams. A CSP deve permitir os recursos da CDN versionada usados pelo gateway; revise as diretivas necessárias segundo a política do ambiente, sem desabilitar a CSP globalmente. Try it out permanece desabilitado. Não inclua credenciais no bundle ou no patch. Preserve o contexto autorizado da PoC e valide RBAC de Application/extensão antes de ampliar acesso.
+O HTML confiável do gateway roda em `iframe.srcdoc` na origem do Argo CD. Não aceite HTML arbitrário de upstreams. A CSP deve permitir os recursos da CDN versionada usados pelo gateway; revise as diretivas necessárias segundo a política do ambiente, sem desabilitar a CSP globalmente. Try it out permanece desabilitado. Não inclua credenciais no bundle ou no patch. O ConfigMap define o contexto do proxy, e o gateway continua responsável pela autorização de cada sessão.
+
+## Teste de configuração em `k3d-argocd-lab`
+
+A configuração runtime foi montada no Deployment local junto com o bundle final do build. O ConfigMap foi trocado temporariamente para `argocd:swagger-petstore` / `appset`, Application existente no cluster; rollouts passaram, o pod recebeu o bundle com o hash local e `/extensions.js` serviu o script de configuração antes do bundle. O harness de produção confirmou os headers `Argocd-Application-Name: argocd:swagger-petstore` e `Argocd-Project-Name: appset`. Depois do teste, o ConfigMap voltou para `argocd:swagger-gateway` / `appset` e o rollout passou.
+
+Esse cluster executa Argo CD **3.5.6**, enquanto o contrato de host deste projeto foi auditado para **3.5.1**. A verificação autenticada no navegador não foi executada e a matriz de compatibilidade integrada permanece vazia. O Deployment local mantém o bundle de teste montado por ConfigMap. Consulte o [registro de runtime config](evidence/runtime-config-k3d-argocd-lab.json).
 
 ## Instalação observada (v0.2.1)
 

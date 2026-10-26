@@ -61,9 +61,8 @@ export async function loadCatalog(context: GatewayContext, signal: AbortSignal, 
     const publication = value as unknown as Publication;
     if (!/^[a-z0-9-]{1,64}$/.test(publication.id) || ids.has(publication.id) ||
         publication.uiUrl !== `/extensions/swagger/ui/${publication.id}` ||
-        publication.specUrl !== `/extensions/swagger/specs/${publication.id}` ||
-        publication.application !== context.application.split(':')[1] || publication.project !== context.project) {
-      throw new GatewayError('Publicação fora do contexto autorizado ou com URLs inválidas.');
+        publication.specUrl !== `/extensions/swagger/specs/${publication.id}`) {
+      throw new GatewayError('Publicação com URLs inválidas.');
     }
     ids.add(publication.id);
     return publication;

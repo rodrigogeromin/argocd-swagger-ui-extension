@@ -1,7 +1,7 @@
 import type {Publication} from '../src/features/swagger/client';
 export const context = {application: 'argocd:swagger-gateway', project: 'appset'};
 export const publications: Publication[] = ['go-demo', 'java-demo'].map((id, index) => ({
-  id, title: index ? 'Java demo' : 'Go demo', application: 'swagger-gateway', project: 'appset', namespace: 'swagger-gateway',
+  id, title: index ? 'Java demo' : 'Go demo', application: index ? 'payments-api' : 'orders-api', project: index ? 'payments' : 'commerce', namespace: 'demo',
   uiUrl: `/extensions/swagger/ui/${id}`, specUrl: `/extensions/swagger/specs/${id}`
 }));
 export function response(body: unknown, status = 200, contentType = 'application/json'): Response {

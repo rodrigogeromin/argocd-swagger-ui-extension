@@ -1,0 +1,13 @@
+# Customize these values for the Application that the proxy authorizes.
+# The Application name uses Argo CD's namespace:name header format.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swagger-gateway-config
+  namespace: argocd
+data:
+  extension-0-swagger-gateway-config.js: |
+    window.swaggerGatewayConfig = Object.freeze({
+      application: 'argocd:swagger-gateway',
+      project: 'appset'
+    });

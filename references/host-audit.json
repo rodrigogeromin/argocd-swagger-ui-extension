@@ -148,7 +148,7 @@
     "notes": [
       "Verified full extension service and bootstrap, package manifest and resolved React/DOM/types entries in pnpm lock.",
       "onAddSystemLevelExtension registers sidebar title/path and iconClassName `fa ${extension.icon}`; Page renders the extension component without props.",
-      "Explicit immutable PoC context argocd:swagger-gateway / appset is supplied by the adapter; session and server-side RBAC remain authoritative.",
+      "Immutable proxy context is loaded from the per-install ConfigMap JavaScript before the extension bundle; session and server-side RBAC remain authoritative.",
       "React/DOM 19.2.6; types 19.2.14/19.2.3; automatic JSX via ReactJSXRuntime.",
       "Startup lifecycle: index.tsx schedules createRoot.render asynchronously; App constructor subscribes to systemLevel before the initial DOM commit. registerSystemLevelExtension emits synchronously and App does not replay the registry, so registration waits for #app child elements."
     ]
