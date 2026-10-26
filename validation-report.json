@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T15:49:06.761Z",
+  "generatedAt": "2026-10-26T16:09:52.677Z",
   "environment": {
     "node": "v26.10.0",
     "npm": "11.19.1",
@@ -46,7 +46,7 @@
     },
     "templateVersion": "2.2.1",
     "templateRevision": "a025a4141f3f42926d12fb37f1ceb7c2fbeda736e4466ce228c4118059fef803",
-    "sourceRevision": "1d0ce05a4062afbd5671a4c7e7ba42b4388ee7c579029d037265a155d9ec4fee",
+    "sourceRevision": "87f96a371faf0dcb98d1739f658b232d3d4ce5fe1cfd7207a023c6b666fe273a",
     "bundleSha256": "d91b7465eee3198274cc5da871c75d349c94e627d9fc4c635c3b657c159b414e",
     "packageSha256": "0e4c5db23c2181b5d5b38dc7cc45dd17226dd8f28f664d87d2527e80b517412a"
   },
